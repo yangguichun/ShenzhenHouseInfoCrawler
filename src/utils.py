@@ -3,6 +3,10 @@ import re
 
 class utils:
     @classmethod
+    def remove_blank_char(cls, str):
+        return str.replace('\t','').replace('\n','').replace('\r','')
+
+    @classmethod
     def get_num(self, text):
         nums = re.findall(r'\d+\.?\d+', text)
         if len(nums) > 0:
