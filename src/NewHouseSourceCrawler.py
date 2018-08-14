@@ -1,12 +1,11 @@
 import re
-from src.DbInterface import DbInterface, NewHSrcDbInterface
+from src.Dao.NewHouseSourceDao import NewHouseSourceDao
 from src.utils import  utils
 from bs4 import BeautifulSoup
 from src.NewHSrcPrjPageDecoder import NewHSrcPrjPageDecoder
 from src.NewHSrcBldPageDecoder import NewHSrcBldPageDecoder
-from src.NewHSrcHousePageDecoder import NewHSrcHousePageDecoder
 from src.CrawlerBase import CrawlerBase
-import time
+
 
 class NewHouseSourceCrawler(CrawlerBase):
     '''
@@ -124,7 +123,7 @@ class NewHouseSourceCrawler(CrawlerBase):
         for building in project_info['building_list']:
             utils.print('读取 {} 的 {} 页面...'.format(project_info['project_name'], building['building_name']))
             building['project_id'] = project_info['id']
-            if NewHSrcDbInterface.get_building_id(building) > 0:
+            if NewHouseSourceDao.get_building_id(building) > 0:
                 # 如果该建筑已经存在，则说明之前找过，直接跳过
                 continue
 
@@ -136,12 +135,12 @@ class NewHouseSourceCrawler(CrawlerBase):
             html_node = BeautifulSoup(r.text, 'lxml')
             house_list = NewHSrcBldPageDecoder.decode(html_node, building['building_name'], project_info['project_name'])
 
-            if NewHSrcDbInterface.write_newhouse_building(building) == 0:
+            if NewHouseSourceDao.write_newhouse_building(building) == 0:
                 continue
-            building_id = NewHSrcDbInterface.get_building_id(building)
+            building_id = NewHouseSourceDao.get_building_id(building)
             if building_id == 0:
                 print('获取楼栋id失败，{}, {}'.format(project_info['project_name'], building['building_name']))
                 continue
             for house in house_list:
                 house['building_id'] = building_id
-            NewHSrcDbInterface.write_newhouse_source_houselist(house_list)
+                NewHouseSourceDao.write_newhouse_source_houselist(house_list)

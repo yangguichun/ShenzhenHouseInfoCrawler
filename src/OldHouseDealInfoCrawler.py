@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-from datetime import datetime as dt
-from src.DbInterface import DbInterface
+from src.Dao.OldHouseDealInfoDao import OldHouseDealInfoDao
 from src.utils import utils
 from src.CrawlerBase import CrawlerBase
 
@@ -62,7 +61,7 @@ class OldHouseDealInfoCrawler(CrawlerBase):
         if useNode is not None:
             house_list = self.__extract_by_use(useNode, area_name)
             if len(house_list) > 0:
-                DbInterface.write_oldhouse_byuse(house_list)
+                OldHouseDealInfoDao.write_oldhouse_byuse(house_list)
 
     def __extract_by_use(self, node, area_name):
         utils.print('提取按照用途分类的数据...')

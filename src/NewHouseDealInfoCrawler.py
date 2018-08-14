@@ -1,9 +1,8 @@
-import requests
 import re
 
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
-from src.DbInterface import DbInterface
+from src.Dao.NewHouseDealInfoDao import NewHouseDealInfoDao
 from src.CrawlerBase import CrawlerBase
 from src.utils import utils
 class NewHouseDealInfoCrawler(CrawlerBase):
@@ -51,19 +50,19 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         if typeNode is not None:
             house_list = self.__extact_by_type(typeNode, area_name)
             if len(house_list) > 0:
-                DbInterface.write_newhouse_bytype(house_list)
+                NewHouseDealInfoDao.write_newhouse_bytype(house_list)
 
         areaNode = pageNode.find('tr', id='TrClientList5')
         if areaNode is not None:
             house_list = self.__extract_by_area(areaNode, area_name)
             if len(house_list) > 0:
-                DbInterface.write_newhouse_byarea(house_list)
+                NewHouseDealInfoDao.write_newhouse_byarea(house_list)
 
         useNode = pageNode.find('tr', id='TrClientList2')
         if useNode is not None:
             house_list = self.__extract_by_use(useNode, area_name)
             if len(house_list) > 0:
-                DbInterface.write_newhouse_byuse(house_list)
+                NewHouseDealInfoDao.write_newhouse_byuse(house_list)
 
     def __get_num(self, text):
         nums = re.findall(r'\d+\.?\d+', text)

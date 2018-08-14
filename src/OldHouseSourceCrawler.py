@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup
-from src.DbInterface import DbInterface
+from src.Dao.OldHouseSourceDao import OldHouseSourceDao
 from src.utils import utils
 import re
-from datetime import datetime as dt
+
 
 class OldHouseSourceCrawler:
     def __init__(self, pageIndex = 1):
@@ -84,4 +84,4 @@ class OldHouseSourceCrawler:
             house['agency_info'] = utils.remove_blank_char(house_properties[7].text)
             house['thedate'] = house_properties[8].text
             house_list.append(house)
-        return DbInterface.write_oldhouse_source(house_list) > 0
+        return OldHouseSourceDao.write_oldhouse_source(house_list) > 0
