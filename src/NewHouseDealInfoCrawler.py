@@ -19,23 +19,9 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         然后，对于每种类型，要分别爬取全市、南山、福田、罗湖、盐田、保安、龙岗 七个区域的数据
         :return:
         '''
-        print('---开始抓取深圳新房成交数据---')
+        utils.print('---开始抓取深圳新房成交数据---')
         for area in self.areas:
             self.__query_one_area(area)
-
-    def __extract_formdata_from_newpage(self, node):
-        '''
-        从新页面的html中提取fromdata数据，便于访问下一页
-        :param node:
-        :return:
-        '''
-        input_list = node.find_all('input')
-        for input in input_list:
-            if input['name'] == 'ctl00$ContentPlaceHolder1$radSelect':
-                continue
-            name = input['name']
-            value = input['value']
-            self.from_data[name] = value
 
 
     def __query_one_area(self, area_name):
@@ -51,12 +37,12 @@ class NewHouseDealInfoCrawler(CrawlerBase):
             r = utils.request_with_retry(self.__url)
         else:
             fromdata = self.areas[area_name]
-            self.from_data['ctl00$ContentPlaceHolder1$scriptManager1'] = fromdata['ctl00$ContentPlaceHolder1$scriptManager1']
-            self.from_data['__EVENTTARGET'] = fromdata['__EVENTTARGET']
-            r = utils.request_with_retry(self.__url, self.from_data)
+            self.form_data['ctl00$ContentPlaceHolder1$scriptManager1'] = fromdata['ctl00$ContentPlaceHolder1$scriptManager1']
+            self.form_data['__EVENTTARGET'] = fromdata['__EVENTTARGET']
+            r = utils.request_with_retry(self.__url, self.form_data)
 
         s = BeautifulSoup(r.text, 'lxml')
-        self.__extract_formdata_from_newpage(s)
+        self.extract_formdata_from_newpage(s)
         self.__extract_info_from_page_into_db(s, area_name)
 
 
@@ -93,10 +79,10 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         :param node:
         :return:
         '''
-        print('提取按照户型分类的数据...')
+        utils.print('提取按照户型分类的数据...')
         table = node.find('table')
         if table is None:
-            print('没有找到按照户型分类的数据')
+            utils.print('没有找到按照户型分类的数据')
             return []
 
         row_node_list = table.find_all('tr')
@@ -129,10 +115,10 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         :param area_name:
         :return:
         '''
-        print('提取按照面积分类的数据...')
+        utils.print('提取按照面积分类的数据...')
         table = node.find('table')
         if table is None:
-            print('没有找到按照面积分类的数据')
+            utils.print('没有找到按照面积分类的数据')
             return []
 
         row_node_list = table.find_all('tr')
@@ -157,10 +143,10 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         return house_list
 
     def __extract_by_use(self, node, area_name):
-        print('提取按照用途分类的数据...')
+        utils.print('提取按照用途分类的数据...')
         table = node.find('table')
         if table is None:
-            print('没有找到按照用户分类的数据')
+            utils.print('没有找到按照用户分类的数据')
             return []
 
         row_node_list = table.find_all('tr')

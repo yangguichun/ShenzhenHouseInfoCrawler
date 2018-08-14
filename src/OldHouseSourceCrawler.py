@@ -14,13 +14,14 @@ class OldHouseSourceCrawler:
     __total_count = 39782
 
     def crawl(self):
-        print('{} 开始抓取二手房源数据...'.format(dt.now()))
+        utils.print('开始抓取二手房源数据...')
         pageindex = self.__page_index
         while True:
             try:
-                self.__crawl_one_page(pageindex)
+                if not self.__crawl_one_page(pageindex):
+                    break
             except Exception as e:
-                print('抓取第{}页失败, {}'.format(pageindex, str(e)))
+                utils.print('抓取第{}页失败, {}'.format(pageindex, str(e)))
                 continue
 
             if self.__total_count < self.__page_size * (pageindex - 1):
@@ -35,11 +36,11 @@ class OldHouseSourceCrawler:
         '''
         spans = node.find_all('span', class_='a1')
         if len(spans) != 2:
-            print('查找记录总数失败')
+            utils.print('查找记录总数失败')
             return False
         nums = re.findall(r'\d+', spans[1].text)
         if len(nums) != 1:
-            print('从字符串 {} 提取记录总数失败'.format(spans[1].text))
+            utils.print('从字符串 {} 提取记录总数失败'.format(spans[1].text))
             return
         self.__total_count = int(nums[0])
         return True
@@ -49,21 +50,22 @@ class OldHouseSourceCrawler:
         '''
         抓去一页的房屋信息
         :param pageindex:
-        :return:
+        :return: 是否要继续查找下一页，如果当前页出错，或者查找的结果一个都没写进去，那就没必要再找下一页了
         '''
-        print('{} 抓取第{}页...'.format(dt.now(), pageindex))
+        utils.print('抓取第{}页...'.format(pageindex))
         url = self.__url.format(pageindex)
         r = utils.request_with_retry(url)
         s = BeautifulSoup(r.text, 'lxml')
         if pageindex == 1:
             if not self.__get_total_count(s):
-                return
+                return False
 
         tablenode = s.find('table', id='DataGrid1')
         if tablenode is None:
-            print('查找表格失败')
-            return
+            utils.print('查找表格失败')
+            return False
         house_list = []
+
         house_nodes = tablenode.find_all('tr')
         for house_node in house_nodes:
             house_properties = house_node.find_all('td')
@@ -82,4 +84,4 @@ class OldHouseSourceCrawler:
             house['agency_info'] = utils.remove_blank_char(house_properties[7].text)
             house['thedate'] = house_properties[8].text
             house_list.append(house)
-        DbInterface.write_oldhouse_source(house_list)
+        return DbInterface.write_oldhouse_source(house_list) > 0

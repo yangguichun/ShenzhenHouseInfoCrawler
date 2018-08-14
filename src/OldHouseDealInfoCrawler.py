@@ -17,11 +17,11 @@ class OldHouseDealInfoCrawler(CrawlerBase):
         然后，对于每种类型，要分别爬取全市、南山、福田、罗湖、盐田、保安、龙岗 七个区域的数据
         :return:
         '''
-        print('---开始抓取深圳二手房成交数据---')
+        utils.print('---开始抓取深圳二手房成交数据---')
         for area in self.areas:
             self.__query_one_area(area)
 
-    def __extract_formdata_from_newpage(self, node):
+    def extract_formdata_from_newpage(self, node):
         '''
         从新页面的html中提取fromdata数据，便于访问下一页
         :param node:
@@ -33,7 +33,7 @@ class OldHouseDealInfoCrawler(CrawlerBase):
                 continue
             name = input['name']
             value = input['value']
-            self.from_data[name] = value
+            self.form_data[name] = value
 
 
     def __query_one_area(self, area_name):
@@ -43,18 +43,18 @@ class OldHouseDealInfoCrawler(CrawlerBase):
         :param area_name:
         :return:
         '''
-        print('{} query {} info...'.format(dt.now(), area_name))
+        utils.print('query {} info...'.format(area_name))
         r = None
         if area_name == '全市':
             r = utils.request_with_retry(self.__url)
         else:
             fromdata = self.areas[area_name]
-            self.from_data['ctl00$ContentPlaceHolder1$scriptManager1'] = fromdata['ctl00$ContentPlaceHolder1$scriptManager1']
-            self.from_data['__EVENTTARGET'] = fromdata['__EVENTTARGET']
-            r = utils.request_with_retry(self.__url, self.from_data)
+            self.form_data['ctl00$ContentPlaceHolder1$scriptManager1'] = fromdata['ctl00$ContentPlaceHolder1$scriptManager1']
+            self.form_data['__EVENTTARGET'] = fromdata['__EVENTTARGET']
+            r = utils.request_with_retry(self.__url, self.form_data)
 
         s = BeautifulSoup(r.text, 'lxml')
-        self.__extract_formdata_from_newpage(s)
+        self.extract_formdata_from_newpage(s)
         self.__extract_info_from_page_into_db(s, area_name)
 
     def __extract_info_from_page_into_db(self, pageNode, area_name):
@@ -65,10 +65,10 @@ class OldHouseDealInfoCrawler(CrawlerBase):
                 DbInterface.write_oldhouse_byuse(house_list)
 
     def __extract_by_use(self, node, area_name):
-        print('提取按照用途分类的数据...')
+        utils.print('提取按照用途分类的数据...')
         table = node.find('table')
         if table is None:
-            print('没有找到按照用户分类的数据')
+            utils.print('没有找到按照用户分类的数据')
             return []
 
         row_node_list = table.find_all('tr')

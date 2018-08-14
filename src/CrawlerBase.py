@@ -1,6 +1,6 @@
 
 class CrawlerBase:
-    from_data = {'ctl00$ContentPlaceHolder1$scriptManager1': '',
+    form_data = {'ctl00$ContentPlaceHolder1$scriptManager1': '',
                    '__EVENTTARGET': '',
                    '__EVENTARGUMENT': '',
                    '__LASTFOCUS': '',
@@ -36,3 +36,20 @@ class CrawlerBase:
                   {
                       'ctl00$ContentPlaceHolder1$scriptManager1': 'ctl00$ContentPlaceHolder1$updatepanel1|ctl00$ContentPlaceHolder1$hypYt',
                       '__EVENTTARGET': 'ctl00$ContentPlaceHolder1$hypYt'}}
+
+    def extract_formdata_from_newpage(self, node):
+        '''
+        从新页面的html中提取fromdata数据，便于访问下一页
+        :param node:
+        :return:
+        '''
+        input_list = node.find_all('input', type='hidden')
+        for input in input_list:
+            if input['name'] == 'ctl00$ContentPlaceHolder1$radSelect':
+                continue
+            try:
+                name = input['name']
+                value = input['value']
+                self.form_data[name] = value
+            except:
+                pass
