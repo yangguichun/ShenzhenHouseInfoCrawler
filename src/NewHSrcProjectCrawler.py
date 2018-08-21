@@ -2,21 +2,22 @@ import re
 from src.Dao.NewHouseSourceDao import NewHouseSourceDao
 from src.utils import  utils
 from bs4 import BeautifulSoup
-from src.NewHSrcPrjPageDecoder import NewHSrcPrjPageDecoder
-from src.NewHSrcBldPageDecoder import NewHSrcBldPageDecoder
 from src.CrawlerBase import CrawlerBase
 
 
-class NewHouseSourceCrawler(CrawlerBase):
+class NewHSrcProjectCrawler(CrawlerBase):
     '''
     从这里获取深圳的一手房源信息http://ris.szpl.gov.cn/bol/
     把每个预售的楼盘的所有信息都抓取下来，包括项目信息，几栋楼，几套房，每套房的信息等
     '''
     __url = 'http://ris.szpl.gov.cn/bol/'
     __total_page_count = 0
+    __has_read_total_page_count = False
 
-    def crawl(self):
-        page_index = 1
+    def crawl(self, start_page = 1):
+        #先读取第一页，获取上下文信息
+        self.__crawl_one_page_project(1)
+        page_index  = start_page
         while True:
             self.__crawl_one_page_project(page_index)
             if self.__total_page_count < page_index:
@@ -35,6 +36,7 @@ class NewHouseSourceCrawler(CrawlerBase):
 
     def __crawl_one_page_project(self, page_index):
         r = None
+        utils.print('正在读取第%d页项目列表...' % page_index)
         if page_index == 1:
             r = utils.request_with_retry(self.__url)
         else:
@@ -42,19 +44,22 @@ class NewHouseSourceCrawler(CrawlerBase):
         if r is None:
             utils.print('读取项目页面失败, page_index = {}'.format(page_index))
             return
-
         html_node = BeautifulSoup(r.text, 'lxml')
         self.extract_formdata_from_newpage(html_node)
         if page_index == 1:
             self.__get_total_count(html_node)
 
         project_nodes = self.__get_project_nodes(html_node)
+        project_list = []
         for project_node in project_nodes:
             project = self.__convert_project_node_to_project(project_node)
             if project is None:
                 continue
-            self.__crawl_project_detail(project['url'], project)
-
+            project['is_crawled'] = False
+            project_list.append(project)
+        utils.print('解析出%d条项目信息' % len(project_list))
+        writedcount = NewHouseSourceDao.write_project_summary_list(project_list)
+        utils.print('写入数据库 %d 条记录' % writedcount)
 
     def __get_total_count(self, node):
         '''从node中读取总页数'''
@@ -101,47 +106,3 @@ class NewHouseSourceCrawler(CrawlerBase):
         project['region'] = column_nodes[4].text
         project['thedate'] = column_nodes[5].text
         return project
-
-
-    def __crawl_project_detail(self, url, project_info):
-        '''
-        获取指定项目的详细信息，然后写入到数据库中
-        :param url:
-        :param project_info:  这个是从列表中获取的项目的简要信息
-        :return:
-        '''
-        utils.print('读取项目{}页面'.format(project_info['project_name']))
-        r = utils.request_with_retry(project_info['url'])
-        if r is None:
-            utils.print('读取项目: {} , 页面失败...'.format(project_info['project_name']))
-            return
-
-        s = BeautifulSoup(r.text, 'lxml')
-        if not NewHSrcPrjPageDecoder.decode_and_write(s, project_info):
-            return
-
-        for building in project_info['building_list']:
-            utils.print('读取 {} 的 {} 页面...'.format(project_info['project_name'], building['building_name']))
-            building['project_id'] = project_info['id']
-            if NewHouseSourceDao.get_building_id(building) > 0:
-                # 如果该建筑已经存在，则说明之前找过，直接跳过
-                continue
-
-            r = utils.request_with_retry(building['url'])
-            if r is None:
-                utils.print('读取项目 {} 的楼栋 {} 页面失败.'.format(project_info['project_name'], building['building_name']))
-                continue
-
-            html_node = BeautifulSoup(r.text, 'lxml')
-            house_list = NewHSrcBldPageDecoder.decode(html_node, building['building_name'], project_info['project_name'])
-
-            if NewHouseSourceDao.write_newhouse_building(building) == 0:
-                continue
-            building_id = NewHouseSourceDao.get_building_id(building)
-            if building_id == 0:
-                print('获取楼栋id失败，{}, {}'.format(project_info['project_name'], building['building_name']))
-                continue
-            for house in house_list:
-                house['building_id'] = building_id
-
-            NewHouseSourceDao.write_houselist(house_list)

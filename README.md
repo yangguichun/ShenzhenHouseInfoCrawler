@@ -21,15 +21,20 @@
 ## 依赖的库
 - requests
 - BeautifulSoap
+- schedule
 
 ## 如何使用
 - 安装postgresql数据库
 - 在postgresql内创建名字为loushi的数据库
 - 在loushi内，使用script/script.sql创建对应的表
-- 修改DbInterface.py中的数据库连接信息，设置正确的服务器地址和用户名密码
+- 修改src.Dao.Daobase.py中的数据库连接信息，设置正确的服务器地址和用户名密码
+- 在main.py目录下配置好配置文件config.ini
 - 运行main.py
 
 ## 更新记录
+- 20180821
+    - 添加功能，NewHSrcProjectCrawler，直接抓取所有一手房源的项目信息到数据库，不抓取详情
+    - 添加功能，NewHouseMonitor，每小时检查下是否有新的房源通过预售，有的话，就通过config.ini配置信息给相关人员发送邮件通知
 - 20180815
     - 重构了数据库接口，每种类型数据的接口提取成单独的类
 - 20180814 

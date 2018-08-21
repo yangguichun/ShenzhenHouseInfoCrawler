@@ -5,36 +5,77 @@ from datetime import timedelta
 
 class NewHouseSourceDao(Daobase):
     '''向数据库中写入新房源信息'''
-    @classmethod
-    def __newhouse_source_project_sqlmaker(cls, project):
-        columns = ['thedate', 'region', 'project_name', 'builder', 'address', 'house_useage', 'land_usage',
-                   'land_years_limit', 'land_serial_num', 'land_contact_num', 'presale_license_num', 'pre_sale_count',
-                   'pre_area', 'now_sale_count', 'now_area']
-        sql = "insert into newhousesrc_project ({}) values('{}','{}','{}','{}','{}','{}','{}',{},'{}','{}','{}',{},{},{},{})".format(
-            ','.join(columns),
-            project['thedate'],
-            project['region'],
-            project['project_name'],
-            project['builder'],
-            project['address'],
-            project['house_useage'],
-            project['land_usage'],
-            project['land_years_limit'],
-            project['land_serial_num'],
-            project['land_contact_num'],
-            project['presale_license_num'],
-            project['pre_sale_count'],
-            project['pre_area'],
-            project['now_sale_count'],
-            project['now_area'])
-        return sql
 
     @classmethod
-    def __newhouse_source_project_infogetter(cls, project):
-        return '{}'.format(project['project_name'])
+    def __project_summary_sqlmaker(cls, project):
+        try:
+            columns = ['thedate', 'region', 'presale_license_num', 'project_name', 'builder', 'url', 'is_crawled']
+            sql = "insert into newhousesrc_project_summary ({}) values('{}','{}','{}','{}','{}','{}',{})".format(
+                ','.join(columns),
+                project['thedate'],
+                project['region'],
+                project['presale_license_num'],
+                project['project_name'],
+                project['builder'],
+                project['url'],
+                project['is_crawled'])
+            return sql
+        except:
+            return None
 
     @classmethod
-    def write_newhouse_project(cls, project):
+    def __project_summary_infogetter(cls, project):
+        try:
+            return '{}'.format(project['project_name'])
+        except:
+            return str(project)
+
+    @classmethod
+    def write_project_summary(cls, project):
+        '''将项目简要信息写入到数据库'''
+        return cls.writeoneitem(project, cls.__project_summary_sqlmaker, cls.__project_summary_infogetter)
+
+    @classmethod
+    def write_project_summary_list(cls, project_list):
+        '''将项目简要信息写入到数据库'''
+        return cls.writelist(project_list, cls.__project_summary_sqlmaker, cls.__project_summary_infogetter)
+
+    @classmethod
+    def __project_sqlmaker(cls, project):
+        try:
+            columns = ['thedate', 'region', 'project_name', 'builder', 'address', 'house_useage', 'land_usage',
+                       'land_years_limit', 'land_serial_num', 'land_contact_num', 'presale_license_num', 'pre_sale_count',
+                       'pre_area', 'now_sale_count', 'now_area']
+            sql = "insert into newhousesrc_project ({}) values('{}','{}','{}','{}','{}','{}','{}',{},'{}','{}','{}',{},{},{},{})".format(
+                ','.join(columns),
+                project['thedate'],
+                project['region'],
+                project['project_name'],
+                project['builder'],
+                project['address'],
+                project['house_useage'],
+                project['land_usage'],
+                project['land_years_limit'],
+                project['land_serial_num'],
+                project['land_contact_num'],
+                project['presale_license_num'],
+                project['pre_sale_count'],
+                project['pre_area'],
+                project['now_sale_count'],
+                project['now_area'])
+            return sql
+        except:
+            return None
+
+    @classmethod
+    def __project_infogetter(cls, project):
+        try:
+            return '{}'.format(project['project_name'])
+        except:
+            return str(project)
+
+    @classmethod
+    def write_project(cls, project):
         '''
         id serial NOT NULL, --id
         thedate date NOT NULL, --预售日期
@@ -54,7 +95,7 @@ class NewHouseSourceDao(Daobase):
         now_area float, --现售面积
         :return:
         '''
-        return cls.writeoneitem(project, cls.__newhouse_source_project_sqlmaker, cls.__newhouse_source_project_infogetter)
+        return cls.writeoneitem(project, cls.__project_sqlmaker, cls.__project_infogetter)
 
     @classmethod
     def get_project_id(cls, project):
@@ -76,19 +117,25 @@ class NewHouseSourceDao(Daobase):
         :param building:
         :return:
         '''
-        columns = ['project_id', 'project_name', 'building_name', 'plan_license', 'build_license']
-        sql = "insert into newhousesrc_building ({}) values({},'{}','{}','{}','{}')".format(
-            ','.join(columns),
-            building['project_id'],
-            building['project_name'],
-            building['building_name'],
-            building['plan_license'],
-            building['build_license'])
-        return sql
+        try:
+            columns = ['project_id', 'project_name', 'building_name', 'plan_license', 'build_license']
+            sql = "insert into newhousesrc_building ({}) values({},'{}','{}','{}','{}')".format(
+                ','.join(columns),
+                building['project_id'],
+                building['project_name'],
+                building['building_name'],
+                building['plan_license'],
+                building['build_license'])
+            return sql
+        except:
+            return None
 
     @classmethod
-    def __newhouse_source_building_infogetter(cls, project):
-        return '{}'.format(project['project_name'])
+    def __building_infogetter(cls, project):
+        try:
+            return '{}'.format(project['project_name'])
+        except:
+            return str(project)
 
     @classmethod
     def write_newhouse_building(cls, building):
@@ -102,7 +149,7 @@ class NewHouseSourceDao(Daobase):
         :param building:
         :return:
         '''
-        return cls.writeoneitem(building, cls.__newhouse_source_building_sqlmaker, cls.__newhouse_source_building_infogetter)
+        return cls.writeoneitem(building, cls.__newhouse_source_building_sqlmaker, cls.__building_infogetter)
 
     @classmethod
     def get_building_id(cls, building):
@@ -113,7 +160,7 @@ class NewHouseSourceDao(Daobase):
         return rows[0][0]
 
     @classmethod
-    def __newhosue_source_houselist_sqlmaker(cls, house):
+    def __houselist_sqlmaker(cls, house):
         '''
         id serial not null,
         building_id int not null,
@@ -131,28 +178,35 @@ class NewHouseSourceDao(Daobase):
         :param house:
         :return:
         '''
-        columns = ['building_id', 'building_name', 'branch', 'room_num', 'floor', 'house_type', 'contact_code',
-                   'price', 'usage', 'build_area', 'inside_area', 'share_area']
-        sql = "insert into newhousesrc_house ({}) values({},'{}','{}','{}','{}','{}','{}','{}','{}',{},{},{})".format(
-            ','.join(columns),
-            house['building_id'],
-            house['building_name'],
-            house['branch'],
-            house['room_num'],
-            house['floor'],
-            house['house_type'],
-            house['contact_code'],
-            house['price'],
-            house['usage'],
-            house['build_area'],
-            house['inside_area'],
-            house['share_area'],)
-        return sql
+        try:
+
+            columns = ['building_id', 'building_name', 'branch', 'room_num', 'floor', 'house_type', 'contact_code',
+                       'price', 'usage', 'build_area', 'inside_area', 'share_area']
+            sql = "insert into newhousesrc_house ({}) values({},'{}','{}','{}','{}','{}','{}','{}','{}',{},{},{})".format(
+                ','.join(columns),
+                house['building_id'],
+                house['building_name'],
+                house['branch'],
+                house['room_num'],
+                house['floor'],
+                house['house_type'],
+                house['contact_code'],
+                house['price'],
+                house['usage'],
+                house['build_area'],
+                house['inside_area'],
+                house['share_area'],)
+            return sql
+        except:
+            return None
 
     @classmethod
-    def __write_newhouse_source_houselist_infogetter(cls, house):
-        return '{}, {}'.format(house['branch'], house['room_num'])
+    def __write_houselist_infogetter(cls, house):
+        try:
+            return '{}, {}'.format(house['branch'], house['room_num'])
+        except:
+            return str(house)
 
     @classmethod
-    def write_newhouse_source_houselist(cls, houselist):
-        cls.writelist(houselist, cls.__newhosue_source_houselist_sqlmaker, cls.__write_newhouse_source_houselist_infogetter)
+    def write_houselist(cls, houselist):
+        cls.writelist(houselist, cls.__houselist_sqlmaker, cls.__write_houselist_infogetter)

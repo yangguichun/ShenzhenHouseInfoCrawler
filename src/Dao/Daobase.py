@@ -25,9 +25,10 @@ class Daobase:
             try:
                 # print(sql)
                 sql = sqlmaker(house)
-                cur.execute(sql)
-                conn.commit()
-                succ_counter =+ 1
+                if sql is not None:
+                    cur.execute(sql)
+                    conn.commit()
+                    succ_counter += 1
             except Exception as err:
                 print('{}write item ({}) failed, unknown error: {}, sql: {}'.format(dt.now(), info_getter(house), err, sql))
                 conn.rollback()

@@ -71,10 +71,7 @@ class NewHSrcHousePageDecoder:
         if utils.remove_blank_char(column_nodes[2].text) == '备案价格':
             price_text = utils.remove_blank_char(column_nodes[3].text)
             #58800元 / 平方米(按建筑面积计)
-            price = re.findall(r'(\d+)元', price_text)
-            house['price'] = 0
-            if len(price) > 0:
-                house['price'] = price[0]
+            house['price'] = utils.get_num(price_text)
         return house
 
     @classmethod

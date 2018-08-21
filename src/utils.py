@@ -37,6 +37,8 @@ class utils:
                 return r
             except ConnectionError as err:
                 cls.print('request_with_retry failed, url: {},  error: {}, retrycount: {}'.format(url, str(err), i))
+            except Exception as err:
+                cls.print('request_with_retry failed, url: {}, error: {}, retrycount: {}'.format(url, str(err), i))
             except:
                 cls.print('request_with_retry failed, url: {}, retrycount: {}'.format(url, i))
 

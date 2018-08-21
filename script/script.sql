@@ -197,3 +197,24 @@ WITH (
 );
 ALTER TABLE public.newhousesrc_house
   OWNER TO postgres;
+
+
+--项目的简要信息，判断是否有新项目，以后后续的各种爬虫，都是基于这个来的
+CREATE TABLE public.newhousesrc_project_summary
+(
+  id serial NOT NULL, --id
+  thedate date NOT NULL, --预售日期
+  region character varying(255), --区域
+  presale_license_num varchar(255), --预售证
+  project_name character varying(255) NOT NULL, --项目名称
+  builder character varying(255) NOT NULL, --开发商
+  url varchar(1024) NOT NULL,--项目的url
+  is_crawled boolean,
+  CONSTRAINT newhousesrc_project_summary_primary_key PRIMARY KEY (id),
+  CONSTRAINT newhousesrc_project_summary_presale_license_num UNIQUE (presale_license_num)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.newhousesrc_project_summary
+  OWNER TO postgres;
