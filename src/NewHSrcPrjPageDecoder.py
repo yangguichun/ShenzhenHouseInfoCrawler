@@ -7,10 +7,13 @@ class NewHSrcPrjPageDecoder:
     @classmethod
     def decode_and_write(cls, page_node, project_info):
         project_info = cls.__decode(page_node, project_info)
-        if NewHouseSourceDao.write_project(project_info) == 0:
-            utils.print('写入项目:{} 失败，可能是该项目已经存在.'.format(project_info['project_name']))
-            return False
+        # 写入的结果不做判断，只看一会能不能获取到id，能获取到就算成功
+        NewHouseSourceDao.write_project(project_info)
         project_id = NewHouseSourceDao.get_project_id(project_info)
+
+        if project_id  == 0:
+            utils.print('获取项目Id失败, {}'.format(project_info['project_name']))
+            return False
         project_info['id'] = project_id
         return True
 

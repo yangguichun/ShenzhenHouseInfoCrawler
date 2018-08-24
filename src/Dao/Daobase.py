@@ -72,6 +72,18 @@ class Daobase:
         finally:
             conn.close()
 
-
+    @classmethod
+    def update(cls, sql):
+        conn = cls.get_connection()
+        cur = conn.cursor()
+        try:
+            # print(sql)
+            res = cur.execute(sql)
+            conn.commit()
+        except Exception as err:
+            print('{}, execute sql {} failed, unknown error: {}'.format(dt.now(), sql, err))
+            conn.rollback()
+        finally:
+            conn.close()
 
 

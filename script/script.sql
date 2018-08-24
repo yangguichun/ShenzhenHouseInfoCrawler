@@ -160,6 +160,7 @@ CREATE TABLE public.newhousesrc_building
   building_name character varying(255) NOT NULL,
   plan_license character varying(255) NOT NULL,
   build_license character varying(255) NOT NULL,
+  is_crawled boolean not null,
   CONSTRAINT newhousesrc_building_primary_key PRIMARY KEY (id),
   CONSTRAINT newhousesrc_building_unique UNIQUE (project_id, building_name)
 )
@@ -209,7 +210,7 @@ CREATE TABLE public.newhousesrc_project_summary
   project_name character varying(255) NOT NULL, --项目名称
   builder character varying(255) NOT NULL, --开发商
   url varchar(1024) NOT NULL,--项目的url
-  is_crawled boolean,
+  is_crawled boolean not null,
   CONSTRAINT newhousesrc_project_summary_primary_key PRIMARY KEY (id),
   CONSTRAINT newhousesrc_project_summary_presale_license_num UNIQUE (presale_license_num)
 )

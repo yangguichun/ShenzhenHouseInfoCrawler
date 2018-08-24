@@ -7,6 +7,32 @@ class NewHouseSourceDao(Daobase):
     '''向数据库中写入新房源信息'''
 
     @classmethod
+    def get_one_project(cls, is_crawled = False):
+        sql = ''
+        if is_crawled is None:
+            sql = "select * from newhousesrc_project_summary limit 1"
+        else:
+            sql = "select * from newhousesrc_project_summary where is_crawled = {} limit 1".format(is_crawled)
+
+        rows = cls.select(sql)
+        if len(rows) == 0:
+            return None
+        project = {}
+        row = rows[0]
+        project['thedate'] = row[1]
+        project['region'] = row[2]
+        project['presale_license_num'] = row[3]
+        project['project_name'] = row[4]
+        project['builder'] = row[5]
+        project['url'] = row[6]
+        return project
+
+    @classmethod
+    def update_project_state_to_crawled(cls, presale_license_num):
+        sql = "update newhousesrc_project_summary set is_crawled = TRUE where presale_license_num = '{}'".format(presale_license_num)
+        cls.update(sql)
+
+    @classmethod
     def __project_summary_sqlmaker(cls, project):
         try:
             columns = ['thedate', 'region', 'presale_license_num', 'project_name', 'builder', 'url', 'is_crawled']
@@ -118,14 +144,15 @@ class NewHouseSourceDao(Daobase):
         :return:
         '''
         try:
-            columns = ['project_id', 'project_name', 'building_name', 'plan_license', 'build_license']
-            sql = "insert into newhousesrc_building ({}) values({},'{}','{}','{}','{}')".format(
+            columns = ['project_id', 'project_name', 'building_name', 'plan_license', 'build_license', 'is_crawled']
+            sql = "insert into newhousesrc_building ({}) values({},'{}','{}','{}','{}', {})".format(
                 ','.join(columns),
                 building['project_id'],
                 building['project_name'],
                 building['building_name'],
                 building['plan_license'],
-                building['build_license'])
+                building['build_license'],
+                building['is_crawled'])
             return sql
         except:
             return None
@@ -150,6 +177,18 @@ class NewHouseSourceDao(Daobase):
         :return:
         '''
         return cls.writeoneitem(building, cls.__newhouse_source_building_sqlmaker, cls.__building_infogetter)
+
+    @classmethod
+    def is_building_crawled(cls, building):
+        sql = "select * from newhousesrc_building where project_id='{}' and building_name='{}' and is_crawled = TRUE".format(building['project_id'],building['building_name'] )
+        rows = cls.select(sql)
+        #只要上面的条件搜索不到，就说明要么没有这个建筑，要么建筑的状态是FALSE
+        return len(rows) > 0
+
+    @classmethod
+    def update_building_state_to_crawled(cls, id):
+        sql = "update newhousesrc_building set is_crawled = True where id = {}".format(id)
+        cls.update(sql)
 
     @classmethod
     def get_building_id(cls, building):
