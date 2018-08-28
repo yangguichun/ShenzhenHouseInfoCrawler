@@ -38,30 +38,35 @@ class NewHSrcOneProjectCrawler(CrawlerBase):
             return False
 
         for building in project_info['building_list']:
-            utils.print('读取 {} 的 {} 页面...'.format(project_info['project_name'], building['building_name']))
-            building['project_id'] = project_info['id']
-            building['is_crawled'] = False
-            if NewHouseSourceDao.is_building_crawled(building) > 0:
-                continue
+            try:
 
-            r = utils.request_with_retry(building['url'])
-            if r is None:
-                utils.print('读取项目 {} 的楼栋 {} 页面失败.'.format(project_info['project_name'], building['building_name']))
-                continue
+                utils.print('读取 {} 的 {} 页面...'.format(project_info['project_name'], building['building_name']))
+                building['project_id'] = project_info['id']
+                building['is_crawled'] = False
+                if NewHouseSourceDao.is_building_crawled(building) > 0:
+                    continue
 
-            html_node = BeautifulSoup(r.text, 'lxml')
-            house_list = NewHSrcBldPageDecoder.decode(html_node, building['building_name'], project_info['project_name'])
+                r = utils.request_with_retry(building['url'])
+                if r is None:
+                    utils.print('读取项目 {} 的楼栋 {} 页面失败.'.format(project_info['project_name'], building['building_name']))
+                    continue
 
-            if NewHouseSourceDao.write_newhouse_building(building) == 0:
-                continue
-            building_id = NewHouseSourceDao.get_building_id(building)
-            if building_id == 0:
-                print('获取楼栋id失败，{}, {}'.format(project_info['project_name'], building['building_name']))
-                continue
-            for house in house_list:
-                house['building_id'] = building_id
+                html_node = BeautifulSoup(r.text, 'lxml')
+                house_list = NewHSrcBldPageDecoder.decode(html_node, building['building_name'], project_info['project_name'])
 
-            NewHouseSourceDao.write_houselist(house_list)
-            NewHouseSourceDao.update_building_state_to_crawled(building_id)
+                if NewHouseSourceDao.write_newhouse_building(building) == 0:
+                    continue
+                building_id = NewHouseSourceDao.get_building_id(building)
+                if building_id == 0:
+                    print('获取楼栋id失败，{}, {}'.format(project_info['project_name'], building['building_name']))
+                    continue
+                for house in house_list:
+                    house['building_id'] = building_id
+
+                NewHouseSourceDao.write_houselist(house_list)
+                NewHouseSourceDao.update_building_state_to_crawled(building_id)
+            except Exception as e:
+                utils.print('抓取建筑 {} 失败...'.format(building['building_name']))
+                utils.print(str(e))
 
         NewHouseSourceDao.update_project_state_to_crawled(project_info['presale_license_num'])

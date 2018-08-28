@@ -28,9 +28,9 @@ class utils:
             try:
                 r = None
                 if formdata is None:
-                    r = requests.get(url, 'lxml', headers=headers)
+                    r = requests.get(url, 'lxml', headers=headers, timeout=60)
                 else:
-                    r = requests.post(url, headers=headers, data=formdata)
+                    r = requests.post(url, headers=headers, data=formdata, timeout=60)
                 if r.status_code != requests.codes.ok:
                     cls.print('request_with_retry failed, url: {},  code: {}'.format(url, r.status_code))
                     return None

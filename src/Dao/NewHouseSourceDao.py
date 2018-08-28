@@ -10,9 +10,9 @@ class NewHouseSourceDao(Daobase):
     def get_one_project(cls, is_crawled = False):
         sql = ''
         if is_crawled is None:
-            sql = "select * from newhousesrc_project_summary limit 1"
+            sql = "select * from newhousesrc_project_summary order by thedate desc limit 1"
         else:
-            sql = "select * from newhousesrc_project_summary where is_crawled = {} limit 1".format(is_crawled)
+            sql = "select * from newhousesrc_project_summary where is_crawled = {} order by thedate desc limit 1".format(is_crawled)
 
         rows = cls.select(sql)
         if len(rows) == 0:

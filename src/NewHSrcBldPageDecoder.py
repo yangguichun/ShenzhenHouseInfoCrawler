@@ -25,7 +25,7 @@ class NewHSrcBldPageDecoder:
 
         house_list_node = cls.__get_house_list_node(page_node)
         house_list = []
-        if house_list_node is not None:
+        if house_list_node is not None and branch_info.__contains__('current'):
             house_list = cls.__decode_house_list(house_list_node, branch_info['current'])
 
         for branch in branch_info['list']:
