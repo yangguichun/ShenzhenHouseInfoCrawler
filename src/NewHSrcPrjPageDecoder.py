@@ -50,6 +50,9 @@ class NewHSrcPrjPageDecoder:
             project
 
         building_nodes = building_table_node.find_all('tr')
+        if len(building_nodes) < 4:
+            return project
+
         #删除前3行，这是一些表头信息
         del building_nodes[0]
         del building_nodes[0]

@@ -93,7 +93,6 @@ ShenzhenHouseCrawler.query_every_day_data()
 
 while True:
     schedule.run_pending()
-    # 50秒检查一次
     time.sleep(1)
 
 utils.print('-----------程序退出----------------')
