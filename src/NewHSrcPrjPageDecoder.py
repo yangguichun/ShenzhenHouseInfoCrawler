@@ -47,7 +47,7 @@ class NewHSrcPrjPageDecoder:
         project = {}
         project['building_list'] = []
         if building_table_node is None:
-            project
+            return project
 
         building_nodes = building_table_node.find_all('tr')
         if len(building_nodes) < 4:

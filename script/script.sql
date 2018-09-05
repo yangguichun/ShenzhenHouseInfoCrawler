@@ -219,3 +219,10 @@ WITH (
 );
 ALTER TABLE public.newhousesrc_project_summary
   OWNER TO postgres;
+
+
+
+-- 查询每个项目的楼栋数
+select  a.id, a.project_name, a.presale_license_num, count(b.id) as build_count from newhousesrc_project a, newhousesrc_building b where a.id = b.project_id group by a.id order by build_count ;
+--查询每栋建筑的房屋套数
+select  a.id, a.project_id, a.project_name, a.building_name, count(b.id) as house_count from newhousesrc_building a, newhousesrc_house b where a.id = b.building_id group by a.id order by house_count, project_name, building_name
