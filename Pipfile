@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+schedule = "*"
+"psycopg2" = "*"
+requests = "*"
+"beautifulsoup4" = "*"
+lxml = "*"
+sqlalchemy = "*"
+python-dotenv = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"

@@ -1,0 +1,8 @@
+test.py
+.venv
+venv
+dist
+data
+build
+.env
+*.pyc

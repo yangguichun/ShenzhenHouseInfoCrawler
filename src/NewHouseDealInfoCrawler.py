@@ -2,7 +2,8 @@ import re
 
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
-from src.Dao.NewHouseDealInfoDao import NewHouseDealInfoDao
+import src.Dao.orm_ope as orm_ope
+import src.Dao.orm as orm
 from src.CrawlerBase import CrawlerBase
 from src.utils import utils
 class NewHouseDealInfoCrawler(CrawlerBase):
@@ -50,19 +51,19 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         if typeNode is not None:
             house_list = self.__extact_by_type(typeNode, area_name)
             if len(house_list) > 0:
-                NewHouseDealInfoDao.write_newhouse_bytype(house_list)
+                orm_ope.insert_new_house_list(house_list)
 
         areaNode = pageNode.find('tr', id='TrClientList5')
         if areaNode is not None:
             house_list = self.__extract_by_area(areaNode, area_name)
             if len(house_list) > 0:
-                NewHouseDealInfoDao.write_newhouse_byarea(house_list)
+                orm_ope.insert_new_house_list(house_list)
 
         useNode = pageNode.find('tr', id='TrClientList2')
         if useNode is not None:
             house_list = self.__extract_by_use(useNode, area_name)
             if len(house_list) > 0:
-                NewHouseDealInfoDao.write_newhouse_byuse(house_list)
+                orm_ope.insert_new_house_list(house_list)
 
     def __get_num(self, text):
         nums = re.findall(r'\d+\.?\d+', text)
@@ -94,14 +95,15 @@ class NewHouseDealInfoCrawler(CrawlerBase):
             columns = row.find_all('td')
             if len(columns)<6:
                 continue
-            house = {}
-            house['region']=area_name
-            house['house_type'] = columns[0].text
-            house['deal_count'] = columns[1].text
-            house['area'] = area = utils.get_num(columns[2].text)
-            house['price'] = utils.get_num(columns[3].text)
-            house['availableforsalecount'] = utils.get_num(columns[4].text)
-            house['availableforsalearea'] = utils.get_num(columns[5].text)
+            house = orm.NewHouseByType()
+            house.thedate = dt.now()
+            house.region=area_name
+            house.house_type = columns[0].text
+            house.deal_count = columns[1].text
+            house.area = area = utils.get_num(columns[2].text)
+            house.price = utils.get_num(columns[3].text)
+            house.availableforsalecount = utils.get_num(columns[4].text)
+            house.availableforsalearea = utils.get_num(columns[5].text)
 
             house_list.append(house)
             i+=1
@@ -130,13 +132,14 @@ class NewHouseDealInfoCrawler(CrawlerBase):
             columns = row.find_all('td')
             if len(columns)<5:
                 continue
-            house = {}
-            house['region'] = area_name
-            house['area_level'] = columns[0].text
-            house['deal_count'] = columns[1].text
-            house['area'] = area = utils.get_num(columns[2].text)
-            house['price'] = utils.get_num(columns[3].text)
-            house['total_price'] = utils.get_num(columns[4].text)
+            house = orm.NewHouseByArea()
+            house.thedate = dt.now()
+            house.region = area_name
+            house.area_level = columns[0].text
+            house.deal_count = columns[1].text
+            house.area = area = utils.get_num(columns[2].text)
+            house.price = utils.get_num(columns[3].text)
+            house.total_price = utils.get_num(columns[4].text)
             house_list.append(house)
             i += 1
         return house_list
@@ -158,14 +161,15 @@ class NewHouseDealInfoCrawler(CrawlerBase):
             columns = row.find_all('td')
             if len(columns)<6:
                 continue
-            house = {}
-            house['region']=area_name
-            house['use_type'] = columns[0].text
-            house['deal_count'] = columns[1].text
-            house['area'] = area = utils.get_num(columns[2].text)
-            house['price'] = utils.get_num(columns[3].text)
-            house['availableforsalecount'] = utils.get_num(columns[4].text)
-            house['availableforsalearea'] = utils.get_num(columns[5].text)
+            house = orm.NewHouseByUse()
+            house.thedate = dt.now()
+            house.region=area_name
+            house.use_type = columns[0].text
+            house.deal_count = columns[1].text
+            house.area = area = utils.get_num(columns[2].text)
+            house.price = utils.get_num(columns[3].text)
+            house.availableforsalecount = utils.get_num(columns[4].text)
+            house.availableforsalearea = utils.get_num(columns[5].text)
             house_list.append(house)
             i += 1
         return house_list

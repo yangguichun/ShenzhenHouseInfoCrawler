@@ -15,9 +15,13 @@ class utils:
     def get_num(self, text):
         nums = re.findall(r'\d+\.?\d+', text)
         if len(nums) > 0:
-            return nums[0]
+            return float(nums[0])
         else:
             return 0
+
+    @classmethod
+    def get_int(self, text):
+        return int(self.get_num(text))
 
     @classmethod
     def request_with_retry(cls, url, formdata=None, trycount=3):
