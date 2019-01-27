@@ -24,19 +24,19 @@ def session_scope():
         session.close()
 
 
-def insert_new_house(house):
+def insert_item(item):
     try:
         with session_scope() as session:
-            session.add(house)
+            session.add(item)
         return True
     except Exception as e:
-        print('{} write item ({}) failed, unknown error: {}'.format(dt.now(), house, e))
+        print('{} write item ({}) failed, unknown error: {}'.format(dt.now(), item, e))
         return False
 
 def insert_new_house_list(houseList):
     try:
         for house in houseList:
-            insert_new_house(house)
+            insert_item(house)
         return True
     except Exception as e:
         print('{}insert new house list failed, unknown error: {}'.format(dt.now(), e))
