@@ -51,19 +51,19 @@ class NewHouseDealInfoCrawler(CrawlerBase):
         if typeNode is not None:
             house_list = self.__extact_by_type(typeNode, area_name)
             if len(house_list) > 0:
-                orm_ope.insert_new_house_list(house_list)
+                orm_ope.insert_item_list(house_list)
 
         areaNode = pageNode.find('tr', id='TrClientList5')
         if areaNode is not None:
             house_list = self.__extract_by_area(areaNode, area_name)
             if len(house_list) > 0:
-                orm_ope.insert_new_house_list(house_list)
+                orm_ope.insert_item_list(house_list)
 
         useNode = pageNode.find('tr', id='TrClientList2')
         if useNode is not None:
             house_list = self.__extract_by_use(useNode, area_name)
             if len(house_list) > 0:
-                orm_ope.insert_new_house_list(house_list)
+                orm_ope.insert_item_list(house_list)
 
     def __get_num(self, text):
         nums = re.findall(r'\d+\.?\d+', text)

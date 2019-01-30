@@ -90,6 +90,27 @@ ALTER TABLE public.oldhousebyuse
 
 
 
+-- Table: public.oldhousebyuse
+
+-- DROP TABLE public.oldhousebyuse;
+--二手房成交数据，按照用途分类
+CREATE TABLE public.oldhousebyuse
+(
+  thedate date NOT NULL,
+  region character varying(255) NOT NULL,
+  use_type character varying(255) NOT NULL,
+  area double precision,
+  deal_count integer,
+  CONSTRAINT oldhousebyuse_primary_key PRIMARY KEY (thedate, region, use_type)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.oldhousebyuse
+  OWNER TO postgres;
+
+
+
 
 -- Table: public.oldhousesource
 

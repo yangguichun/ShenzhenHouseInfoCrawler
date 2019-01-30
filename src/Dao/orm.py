@@ -64,6 +64,18 @@ class NewHouseByUse(Base):
         return self.__repr__()
 
 
+# thedate, region, use_type
+class OldHouseByUse(Base):
+    '''--二手房成交数据，按照用途分类'''
+    __tablename__ = 'oldhousebyuse'
+    thedate = Column(Date, nullable=False, primary_key=True)
+    region = Column(String(255), nullable=False, primary_key=True)
+    use_type = Column(String(255), nullable=False, primary_key=True)
+    area = Column(Float)
+    deal_count = Column(Integer)
+
+
+
 class OldHouseSource(Base):
     '''二手房成交信息，按用途划分'''
     __tablename__ = 'oldhousesource'
@@ -119,7 +131,7 @@ class NewHouseSourceBuilding(Base):
 
 class NewHouseSourceHouse(Base):
     '''-- 新房预售，每一套房屋的信息'''
-    __talbename__ = 'newhousesrc_house'
+    __tablename__ = 'newhousesrc_house'
     id = Column(Integer, autoincrement=True, primary_key=True)
     build_id = Column(Integer, nullable=False)
     building_name = Column(String(255))
@@ -140,6 +152,7 @@ class NewHouseSourceHouse(Base):
 
 class NewHouseSourceProjectSummary(Base):
     '''--项目的简要信息，判断是否有新项目，以后后续的各种爬虫，都是基于这个来的'''
+    __tablename__ = 'newhousesrc_project_summary'
     id = Column(Integer, autoincrement=True, nullable=False, primary_key=True)
     thedate = Column(Date, nullable=False)
     region = Column(String(255))

@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
-from src.Dao.OldHouseDealInfoDao import OldHouseDealInfoDao
+import src.Dao.orm as orm
+import src.Dao.orm_ope as orm_ope
 from src.utils import utils
 from src.CrawlerBase import CrawlerBase
+from datetime import datetime as dt
 
 class OldHouseDealInfoCrawler(CrawlerBase):
     '''
@@ -61,7 +63,7 @@ class OldHouseDealInfoCrawler(CrawlerBase):
         if useNode is not None:
             house_list = self.__extract_by_use(useNode, area_name)
             if len(house_list) > 0:
-                OldHouseDealInfoDao.write_oldhouse_byuse(house_list)
+                orm_ope.insert_item_list(house_list)
 
     def __extract_by_use(self, node, area_name):
         utils.print('提取按照用途分类的数据...')
@@ -80,11 +82,12 @@ class OldHouseDealInfoCrawler(CrawlerBase):
             columns = row.find_all('td')
             if len(columns)<3:
                 continue
-            house = {}
-            house['region']=area_name
-            house['use_type'] = columns[0].text
-            house['deal_count'] = utils.get_num(columns[1].text)
-            house['area'] = area = utils.get_num(columns[2].text)
+            house = orm.OldHouseByUse()
+            house.thedate = dt.now()
+            house.region=area_name
+            house.use_type = columns[0].text
+            house.deal_count = utils.get_num(columns[1].text)
+            house.area = area = utils.get_num(columns[2].text)
             house_list.append(house)
             i += 1
         return house_list

@@ -33,7 +33,7 @@ def insert_item(item):
         print('{} write item ({}) failed, unknown error: {}'.format(dt.now(), item, e))
         return False
 
-def insert_new_house_list(houseList):
+def insert_item_list(houseList):
     try:
         for house in houseList:
             insert_item(house)

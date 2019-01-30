@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
-from src.Dao.OldHouseSourceDao import OldHouseSourceDao
+import src.Dao.orm as orm
+import src.Dao.orm_ope as orm_ope
 from src.utils import utils
 import re
 
@@ -73,15 +74,16 @@ class OldHouseSourceCrawler:
                 continue
             if house_properties[0].text == '项目名称':
                 continue
-            house = {}
+            house = orm.OldHouseSource()
             #columns = ['thedate', 'region', 'serial_num', 'project_name','area', 'use_type', 'code', 'agency_info']
-            house['project_name'] = utils.remove_blank_char(house_properties[0].text)
-            house['serial_num'] = house_properties[1].text
-            house['region'] = utils.remove_blank_char(house_properties[2].text)
-            house['area'] = house_properties[3].text
-            house['use_type'] = house_properties[4].text
-            house['code'] = house_properties[6].text
-            house['agency_info'] = utils.remove_blank_char(house_properties[7].text)
-            house['thedate'] = house_properties[8].text
+            house.project_name = utils.remove_blank_char(house_properties[0].text)
+            house.serial_num = house_properties[1].text
+            house.region = utils.remove_blank_char(house_properties[2].text)
+            house.area = house_properties[3].text
+            house.use_type = house_properties[4].text
+            house.code = house_properties[6].text
+            house.agency_info = utils.remove_blank_char(house_properties[7].text)
+            house.thedate = house_properties[8].text
             house_list.append(house)
-        return OldHouseSourceDao.write_oldhouse_source(house_list) > 0
+
+        return orm_ope.insert_item_list(house_list)
